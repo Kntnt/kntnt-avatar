@@ -132,9 +132,7 @@ namespace Kntnt\Avatar {
 
                 $args = $this->get_avatar_data( $user, $args );
 
-                $url = $args['url'];
-
-                if ( ! $url || is_wp_error( $url ) ) {
+                if ( ! isset( $args['url'] ) || ! $args['url'] || is_wp_error( $args['url'] ) ) {
                     return false;
                 }
 
@@ -167,7 +165,7 @@ namespace Kntnt\Avatar {
                 $avatar = sprintf(
                     "<img alt='%s' src='%s' srcset='%s' class='%s' height='%d' width='%d' %s/>",
                     esc_attr( $args['alt'] ),
-                    esc_url( $url ),
+                    esc_url( $args['url'] ),
                     esc_url( $url2x ) . ' 2x',
                     esc_attr( join( ' ', $class ) ),
                     (int) $args['height'],
@@ -225,7 +223,7 @@ namespace Kntnt\Avatar {
 
         private function get_avatar_url( $user, $args ) {
             $args = $this->get_avatar_data( $user, $args );
-            return $args['url'];
+            return isset( $args['url'] ) ? $args['url'] : false;
         }
 
         private function get_avatar_data( $user, $args ) {
@@ -236,9 +234,12 @@ namespace Kntnt\Avatar {
 
                 if ( $user && ! $args['force_default'] ) {
                     $id = get_user_meta( $user->ID, $this->avatar_metadata_key, true );
+                    $args['found_avatar'] = true;
+                }
+                else {
+                    $id = false;
                 }
 
-                $args['found_avatar'] = $id ? true : false;
 
                 if ( ! $id ) {
                     $id = apply_filters( 'kntnt-avatar-default-attachment', get_option( 'kntnt-avatar-default-attachment' ), $args, $user );
